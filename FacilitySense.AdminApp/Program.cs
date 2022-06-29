@@ -21,6 +21,8 @@ builder.Services.AddScoped<IFacilityRepository, FacilityRepository>();
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+//builder.Services.AddSwaggerGen();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -60,6 +62,12 @@ app.UseEndpoints(endpoints =>
                 pattern: "{ controller = Home}/{ action = Index}/{ id ?}");
     endpoints.MapRazorPages();
 });
+
+//app.UseSwagger();
+//app.UseSwaggerUI(swaggerUIOptions =>
+//{
+//    swaggerUIOptions.SwaggerEndpoint("/swagger/v1/swagger.json", "Facility Watch API v1");
+//});
 
 app.MapRazorPages();
 
