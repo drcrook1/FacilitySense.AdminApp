@@ -6,7 +6,20 @@ using FacilitySense.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using System;
 
+
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+                      policy =>
+                      {
+                          policy.AllowAnyOrigin();
+                          policy.AllowAnyMethod();
+                          policy.AllowAnyHeader();
+                      });
+});
 
 // Add services to the container.
 builder.Services.AddRazorPages();
@@ -50,8 +63,9 @@ using (var scope = app.Services.CreateScope())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
+
+app.UseCors(MyAllowSpecificOrigins);
 
 app.UseAuthorization();
 
@@ -59,7 +73,8 @@ app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllerRoute(
                 name: "default",
-                pattern: "{ controller = Home}/{ action = Index}/{ id ?}");
+                pattern: "{ controller = Home}/{ action = Index}/{ id ?}")
+                .RequireCors(MyAllowSpecificOrigins); ;
     endpoints.MapRazorPages();
 });
 
