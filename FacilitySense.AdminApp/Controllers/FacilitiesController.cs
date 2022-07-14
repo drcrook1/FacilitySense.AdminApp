@@ -19,9 +19,10 @@ namespace FacilitySense.AdminApp.Controllers
 
         // GET: api/<FacilitiesController>
         [HttpGet]
-        public async Task<IEnumerable<Facility>> Get()
+        public async Task<ActionResult<IEnumerable<Facility>>> Get()
         {
-            return await _facilityRepository.GetAllAsync();
+            var facilities = await _facilityRepository.GetAllAsync();
+            return Ok(facilities);
         }
 
         // GET api/<FacilitiesController>/5

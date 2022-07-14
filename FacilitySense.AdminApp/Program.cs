@@ -27,12 +27,17 @@ builder.Services.AddRazorPages();
 //Register the DB Context
 builder.Services.AddDbContext<FacilitySenseDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("FacilitySenseDBContext") ?? throw new InvalidOperationException("Connection string 'FacilitySenseDBContext' not found."),
-                              x => x.UseNetTopologySuite()
+                              x => x.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null)
                          ));
 
 builder.Services.AddScoped<IFacilityRepository, FacilityRepository>();
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+builder.Services.AddControllers()
+    .AddJsonOptions(options => {
+        options.JsonSerializerOptions.PropertyNamingPolicy = null;
+    });
 
 //builder.Services.AddSwaggerGen();
 

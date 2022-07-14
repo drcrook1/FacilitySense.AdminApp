@@ -54,7 +54,8 @@ namespace FacilitySense.Repositories
 
         public async Task InsertAsync(Facility facility)
         {
-            await _sqlContext.AddAsync(facility);
+            var result = await _sqlContext.AddAsync(facility);
+            await _sqlContext.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(Facility facility)
