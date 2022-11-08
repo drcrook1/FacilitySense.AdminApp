@@ -5,7 +5,10 @@ using FacilitySense.IRepositories;
 using FacilitySense.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using System;
-
+using Microsoft.Identity.Web;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.AzureAD.UI;
+using System.Diagnostics;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
@@ -33,6 +36,27 @@ builder.Services.AddDbContext<FacilitySenseDBContext>(options =>
 builder.Services.AddScoped<IFacilityRepository, FacilityRepository>();
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(jwtOptions =>
+    {
+        jwtOptions.MetadataAddress = $"https://{builder.Configuration["B2C:TenantName"]}.b2clogin.com/{builder.Configuration["B2C:TenantId"]}/{builder.Configuration["B2C:Policy"]}/v2.0/.well-known/openid-configuration";
+        Trace.WriteLine($"Oauth2 metadata: {jwtOptions.MetadataAddress}");
+        //jwtOptions.Authority = $"https://login.microsoftonline.com/tfp/{Configuration["B2C:TenantId"]}/{Configuration["B2C:Policy"]}/v2.0/";
+        jwtOptions.Audience = builder.Configuration["B2C:ClientId"];
+        jwtOptions.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = (ctx) =>
+            {
+                Trace.WriteLine($"Bearer token validation failed: {ctx.Exception.Message}");
+                var addr = ctx.Options.MetadataAddress;
+                return Task.FromResult(0);
+            }
+        };
+    });
+
 
 builder.Services.AddControllers()
     .AddJsonOptions(options => {
@@ -72,6 +96,7 @@ app.UseRouting();
 
 app.UseCors(MyAllowSpecificOrigins);
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseEndpoints(endpoints =>
